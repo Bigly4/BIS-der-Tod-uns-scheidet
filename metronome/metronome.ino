@@ -1,72 +1,61 @@
-// BID Hapkit setup example 
-
 #include <Arduino.h>
 
-// assign IN1_pin and IN2_pin to D7 and D8
-const char IN1_pin = 7;
-const char IN2_pin = 8;
+const char MOTOR_ENA = 6;
+const char MOTOR_IN1 = 7;
+const char MOTOR_IN2 = 8;
 
-// assign ENA_pin to D6 which supports PWM output
-// for more information check　https://www.teachmemicro.com/arduino-nano-pinout-diagram/
-const char ENA_pin = 6;
-bool speed = 30;
-bool dir;
-void setup() {
-  // put your setup code here, to run once:
-  
-  // TODO1: set IN1_pin, IN2_pin, ENA_pin as ann OUTPUT mode
-  pinMode(IN1_pin, OUTPUT);
-  pinMode(IN2_pin, OUTPUT);
-  pinMode(ENA_pin, OUTPUT);
-  dir = true;
-  }
+const char ENCODER = A7;
 
-
-void loop() {
-  // put your main code here, to run repeatedly:
-
-  // TODO2: drive the motor forward using IN1_pin, IN2_pin, with digitalWrite(),
-  // .      and set the driving power using ENA_pin with analogWrite() with PWM value 0-255.
-  //        Start with smaller PWM value for test.
-  
-  digitalWrite(IN1_pin, dir);
-  digitalWrite(IN2_pin, !dir);
-  analogWrite(ENA_pin, speed);
-  delay(100);
-  dir = !dir;
-}
-/*
-
-int encoderPin = A7;
-int ledPin = LED_BUILTIN;
 int rotation = 0;
-int lastVal;
 int revolutions = 0;
+int lastVal;
+
+bool dir = false;
+int speed = 100;
+
 void setup() {
-  // put your setup code here, to run once:
-
-  pinMode(ledPin, OUTPUT);
-  pinMode(encoderPin, INPUT);
-
+  pinMode(MOTOR_IN1, OUTPUT);
+  pinMode(MOTOR_IN2, OUTPUT);
+  pinMode(MOTOR_ENA, OUTPUT);
+  pinMode(ENCODER, INPUT);
+  lastVal = analogRead(ENCODER);
   Serial.begin(9600);
 
-  int lastVal = analogRead(encoderPin);
+
+  
+  analogWrite(MOTOR_ENA, speed);
 }
 
-void loop() {
-  int currVal = analogRead(encoderPin);
+void readPosition() {
+  int currVal = analogRead(ENCODER);
   int diff = lastVal - currVal;
-  if (diff > 500) {
+  if (diff < -500) {
     revolutions++;
   }
-  else if (diff < -500) {
+  else if (diff > 500) {
     revolutions--;
   }
   Serial.println(revolutions);
   lastVal = currVal;
-  delay(10);
-
 }
 
-
-*/
+void loop() {
+  readPosition();
+  analogWrite(MOTOR_ENA, speed);
+  digitalWrite(MOTOR_IN1, dir);
+  digitalWrite(MOTOR_IN2, !dir);
+  if (revolutions > 1) {
+    if (!dir) {
+      digitalWrite(MOTOR_ENA, LOW);
+      delay(100);
+    }
+    dir = true;
+  } else if (revolutions < -1) {
+    if (dir) {
+      digitalWrite(MOTOR_ENA, LOW);
+      delay(100);
+    }
+    dir = false;
+  }
+  
+}
