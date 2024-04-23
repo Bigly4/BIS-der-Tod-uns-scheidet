@@ -11,7 +11,7 @@ int revolutions = 0;
 int lastVal;
 
 bool dir = false;
-int speed = 100;
+int speed = 120;
 
 void setup() {
   pinMode(MOTOR_IN1, OUTPUT);
